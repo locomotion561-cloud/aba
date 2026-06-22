@@ -3,49 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kategori Avcısı Pro</title>
+    <title>Kategori Avcısı Pro - Sürükle Bırak</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; touch-action: none; background: #f9f9f9; }
-        #game-area { height: 300px; display: flex; align-items: center; justify-content: center; }
-        #draggable-item { width: 150px; height: 150px; cursor: grab; border: 2px solid #333; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .drop-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; max-width: 500px; }
-        .zone { padding: 20px; background: #e0e0e0; border: 2px dashed #888; text-align: center; border-radius: 10px; font-weight: bold; }
-        #score { font-size: 1.5rem; margin: 20px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none; /* Metin seçilmesini engelle (sürüklemeyi kolaylaştırır) */
+        }
+
+        /* Skor ve Geri Bildirim Paneli */
+        #game-header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #score { font-size: 1.8rem; font-weight: bold; color: #2ecc71; }
+        #message { margin-top: 10px; font-size: 1.2rem; min-height: 1.4rem; color: #7f8c8d; }
+
+        /* Sürüklenebilir Görsel Alanı */
+        #item-container {
+            margin: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #word-text { font-size: 2.2rem; font-weight: bold; margin-bottom: 15px; color: #34495e; }
+        #draggable-item {
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            border: 4px solid #333;
+            background-color: #fff;
+            background-size: cover;
+            background-position: center;
+            cursor: grab;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        #draggable-item:active { cursor: grabbing; transform: scale(1.05); }
+
+        /* Kategori Kutuları Area */
+        #drop-zones-container {
+            width: 90%;
+            max-width: 600px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .zone {
+            padding: 30px 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            border-radius: 15px;
+            border: 4px dashed rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* Kategori Renkleri */
+        .category-meyve { background-color: #e74c3c; } /* Kırmızı */
+        .category-esya { background-color: #3498db; }  /* Mavi */
+        .category-arac { background-color: #f39c12; }  /* Turuncu */
+        .category-hayvan { background-color: #9b59b6; } /* Mor */
+
+        /* Sürükleme efekti - Kutuya yaklaşıldığında */
+        .zone.drag-over {
+            transform: scale(1.1);
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
 
-    <div id="score">Puan: 0</div>
-    <div id="game-area">
-        <div id="draggable-item" draggable="true" ondragstart="drag(event)">Muz Görseli</div>
+    <div id="game-header">
+        <div id="score">Puan: 0</div>
+        <div id="message">Görseli doğru kategoriye sürükle!</div>
     </div>
 
-    <div class="drop-zones">
-        <div class="zone" ondrop="drop(event, 'Meyve')" ondragover="allowDrop(event)">Meyve</div>
-        <div class="zone" ondrop="drop(event, 'Eşya')" ondragover="allowDrop(event)">Eşya</div>
-        <div class="zone" ondrop="drop(event, 'Araç')" ondragover="allowDrop(event)">Araç</div>
-        <div class="zone" ondrop="drop(event, 'Hayvan')" ondragover="allowDrop(event)">Hayvan</div>
+    <div id="item-container">
+        <div id="word-text">Kelime</div>
+        <div id="draggable-item" draggable="true"></div>
+    </div>
+
+    <div id="drop-zones-container">
+        <div class="zone category-meyve" data-category="Meyve">Meyve</div>
+        <div class="zone category-esya" data-category="Eşya">Eşya</div>
+        <div class="zone category-arac" data-category="Araç">Araç</div>
+        <div class="zone category-hayvan" data-category="Hayvan">Hayvan</div>
     </div>
 
     <script>
+        // --- Oyun Verisi (Kelime, Kategori, Görsel URL) ---
+        const gameData = [
+            {word: "Elma", cat: "Meyve", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6bccb?q=80&w=400&auto=format&fit=crop"},
+            {word: "Masa", cat: "Eşya", img: "https://images.unsplash.com/photo-1595181773950-848e028b1e9c?q=80&w=400&auto=format&fit=crop"},
+            {word: "Araba", cat: "Araç", img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=400&auto=format&fit=crop"},
+            {word: "Kedi", cat: "Hayvan", img: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=400&auto=format&fit=crop"},
+            {word: "Muz", cat: "Meyve", img: "https://images.unsplash.com/photo-1571771894821-ad9b6c11b08e?q=80&w=400&auto=format&fit=crop"},
+            {word: "Sandalye", cat: "Eşya", img: "https://images.unsplash.com/photo-1591873132644-b2089b7eb927?q=80&w=400&auto=format&fit=crop"},
+            {word: "Uçak", cat: "Araç", img: "https://images.unsplash.com/photo-1506411516091-a5330e7cc8aa?q=80&w=400&auto=format&fit=crop"},
+            {word: "Köpek", cat: "Hayvan", img: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop"}
+        ];
+
+        // --- Oyun Durumu Variables ---
+        let currentItemIndex = -1;
         let score = 0;
-        let currentItem = { word: "Muz", cat: "Meyve" };
+        const draggableItem = document.getElementById('draggable-item');
+        const wordText = document.getElementById('word-text');
+        const scoreDisplay = document.getElementById('score');
+        const messageDisplay = document.getElementById('message');
+        const zones = document.querySelectorAll('.zone');
 
-        function allowDrop(ev) { ev.preventDefault(); }
-        function drag(ev) { ev.dataTransfer.setData("text", currentItem.cat); }
+        // --- Fonksiyonlar ---
 
-        function drop(ev, cat) {
-            ev.preventDefault();
-            let data = ev.dataTransfer.getData("text");
-            if (data === cat) {
-                score += 10;
-                document.getElementById('score').innerText = "Puan: " + score;
-                alert("Doğru! 🎉");
-                // Burada yeni kelimeyi yükleyen bir fonksiyon çağrılabilir
-            } else {
-                alert("Tekrar dene! 🔄");
-            }
+        // 1. Yeni Kelime ve Görsel Yükle
+        function loadNextItem() {
+            // Rastgele yeni bir öğe seç
+            currentItemIndex = Math.floor(Math.random() * gameData.length);
+            const data = gameData[currentItemIndex];
+
+            // Arayüzü güncelle
+            wordText.innerText = data.word;
+            draggableItem.style.backgroundImage = `url('${data.img}')`;
+            messageDisplay.innerText = "Sıradaki görseli sürükle...";
         }
+
+        // 2. Drag Start (Sürükleme başladığında veri aktar)
+        draggableItem.addEventListener('dragstart', (e) => {
+            const data = gameData[currentItemIndex];
+            e.dataTransfer.setData('text/plain', data.cat); // Kategori bilgisini transfer et
+            messageDisplay.innerText = "Bırakmak için bir kutu seç!";
+        });
+
+        // 3. Drop Zones Olayları (Meyve, Eşya kutuları vb.)
+        zones.forEach(zone => {
+            // Sürüklenen öğe kutunun üzerindeyken (Gerekli)
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Varsayılanı engelle (drop'a izin ver)
+                zone.classList.add('drag-over'); // Görsel efekt ekle
+            });
+
+            // Sürüklenen öğe kutudan ayrıldığında
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            // Öğeyi kutuya bıraktığında
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+
+                const droppedCategory = e.dataTransfer.getData('text/plain'); // Transfer edilen veri
+                const zoneCategory = zone.getAttribute('data-category'); // Kutunun kategorisi
+
+                if (droppedCategory === zoneCategory) {
+                    // DOĞRU CEVAP
+                    score += 10;
+                    scoreDisplay.innerText = "Puan: " + score;
+                    messageDisplay.innerText = "Harika! Doğru 🎉";
+                    messageDisplay.style.color = "#2ecc71";
+                    
+                    // Görseli geçici olarak gizle ve yeni kelimeyi yükle
+                    draggableItem.style.visibility = "hidden";
+                    setTimeout(() => {
+                        draggableItem.style.visibility = "visible";
+                        messageDisplay.style.color = "#7f8c8d";
+                        loadNextItem();
+                    }, 1000); // 1 saniye bekle
+
+                } else {
+                    // YANLIŞ CEVAP
+                    messageDisplay.innerText = "Üzgünüm, tekrar dene! 🔄";
+                    messageDisplay.style.color = "#e74c3c";
+                    setTimeout(() => messageDisplay.style.color = "#7f8c8d", 1500);
+                }
+            });
+        });
+
+        // Oyunu Başlat
+        loadNextItem();
+
     </script>
 </body>
 </html>
