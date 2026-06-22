@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori Avcısı</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #word-display { font-size: 3rem; margin: 50px; font-weight: bold; color: #333; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; max-width: 400px; }
+        button { padding: 30px; font-size: 1.5rem; border: none; border-radius: 15px; cursor: pointer; background: #007bff; color: white; touch-action: manipulation; }
+        button:active { background: #0056b3; }
+        #feedback { margin-top: 20px; font-size: 1.2rem; height: 30px; }
+    </style>
+</head>
+<body>
+
+    <div id="word-display">Yükleniyor...</div>
+    <div class="controls">
+        <button onclick="checkAnswer('Meyve')">Meyve</button>
+        <button onclick="checkAnswer('Eşya')">Eşya</button>
+        <button onclick="checkAnswer('Araç')">Araç</button>
+        <button onclick="checkAnswer('Hayvan')">Hayvan</button>
+    </div>
+    <div id="feedback"></div>
+
+    <script>
+        const data = [
+            {word: "Elma", cat: "Meyve"},
+            {word: "Sandalye", cat: "Eşya"},
+            {word: "Araba", cat: "Araç"},
+            {word: "Kedi", cat: "Hayvan"},
+            {word: "Muz", cat: "Meyve"},
+            {word: "Masa", cat: "Eşya"}
+        ];
+
+        let currentItem = {};
+
+        function nextWord() {
+            currentItem = data[Math.floor(Math.random() * data.length)];
+            document.getElementById('word-display').innerText = currentItem.word;
+            document.getElementById('feedback').innerText = "";
+        }
+
+        function checkAnswer(selectedCat) {
+            if (selectedCat === currentItem.cat) {
+                document.getElementById('feedback').innerText = "Doğru! 🎉";
+                setTimeout(nextWord, 1000);
+            } else {
+                document.getElementById('feedback').innerText = "Tekrar Dene! 😊";
+            }
+        }
+
+        nextWord();
+    </script>
+</body>
+</html>
