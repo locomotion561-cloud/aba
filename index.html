@@ -3,68 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kategori Avcısı</title>
+    <title>Kategori Avcısı Pro</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-around; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        #game-area { text-align: center; }
-        #draggable-item { width: 150px; height: 150px; background: white; border: 3px solid #333; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; padding: 10px; touch-action: none; }
-        img { width: 80px; height: 80px; object-fit: contain; }
-        .drop-zones { display: flex; gap: 10px; width: 100%; justify-content: center; padding-bottom: 50px; }
-        .zone { width: 80px; height: 80px; border: 3px dashed #666; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; text-align: center; background: white; }
-        #score { font-size: 1.5rem; margin-top: 10px; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; touch-action: none; background: #f9f9f9; }
+        #game-area { height: 300px; display: flex; align-items: center; justify-content: center; }
+        #draggable-item { width: 150px; height: 150px; cursor: grab; border: 2px solid #333; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .drop-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; max-width: 500px; }
+        .zone { padding: 20px; background: #e0e0e0; border: 2px dashed #888; text-align: center; border-radius: 10px; font-weight: bold; }
+        #score { font-size: 1.5rem; margin: 20px; }
     </style>
 </head>
 <body>
 
+    <div id="score">Puan: 0</div>
     <div id="game-area">
-        <div id="draggable-item" draggable="true">
-            <img id="item-img" src="" alt="nesne">
-            <span id="item-text"></span>
-        </div>
-        <div id="score">Puan: 0</div>
+        <div id="draggable-item" draggable="true" ondragstart="drag(event)">Muz Görseli</div>
     </div>
 
     <div class="drop-zones">
-        <div class="zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-cat="Meyve">Meyve</div>
-        <div class="zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-cat="Eşya">Eşya</div>
-        <div class="zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-cat="Araç">Araç</div>
-        <div class="zone" ondrop="drop(event)" ondragover="allowDrop(event)" data-cat="Hayvan">Hayvan</div>
+        <div class="zone" ondrop="drop(event, 'Meyve')" ondragover="allowDrop(event)">Meyve</div>
+        <div class="zone" ondrop="drop(event, 'Eşya')" ondragover="allowDrop(event)">Eşya</div>
+        <div class="zone" ondrop="drop(event, 'Araç')" ondragover="allowDrop(event)">Araç</div>
+        <div class="zone" ondrop="drop(event, 'Hayvan')" ondragover="allowDrop(event)">Hayvan</div>
     </div>
 
     <script>
-        const items = [
-            {word: "Elma", cat: "Meyve", img: "🍎"},
-            {word: "Masa", cat: "Eşya", img: "🪑"},
-            {word: "Araba", cat: "Araç", img: "🚗"},
-            {word: "Kedi", cat: "Hayvan", img: "🐱"}
-        ];
-
         let score = 0;
-        let currentItem = {};
-
-        function nextItem() {
-            currentItem = items[Math.floor(Math.random() * items.length)];
-            document.getElementById('item-text').innerText = currentItem.word;
-            document.getElementById('item-img').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E" + currentItem.img + "%3C/text%3E%3C/svg%3E";
-        }
+        let currentItem = { word: "Muz", cat: "Meyve" };
 
         function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { ev.dataTransfer.setData("text", currentItem.cat); }
 
-        document.getElementById('draggable-item').addEventListener('dragstart', (ev) => {
-            ev.dataTransfer.setData("text", currentItem.cat);
-        });
-
-        function drop(ev) {
+        function drop(ev, cat) {
             ev.preventDefault();
-            const data = ev.dataTransfer.getData("text");
-            if (data === ev.target.getAttribute('data-cat')) {
+            let data = ev.dataTransfer.getData("text");
+            if (data === cat) {
                 score += 10;
                 document.getElementById('score').innerText = "Puan: " + score;
-                nextItem();
+                alert("Doğru! 🎉");
+                // Burada yeni kelimeyi yükleyen bir fonksiyon çağrılabilir
+            } else {
+                alert("Tekrar dene! 🔄");
             }
         }
-
-        nextItem();
     </script>
 </body>
 </html>
