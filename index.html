@@ -5,28 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kategori Avcısı Pro</title>
     <style>
-        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; background: #f0f2f5; }
+        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f0f2f5; overflow: hidden; }
         
-        #game-header { text-align: center; padding: 15px; }
+        #game-header { position: absolute; top: 20px; text-align: center; }
         #score { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
         #word-text { font-size: 1.8rem; font-weight: bold; color: #34495e; margin: 10px 0; }
         
-        /* Görsel Alanı - Ekranın orta kısmını kaplar */
         #draggable-item { 
             width: 220px; height: 220px; border: 5px solid #333; border-radius: 15px; 
             background-size: cover; background-position: center; background-color: #fff;
             box-shadow: 0 10px 15px rgba(0,0,0,0.2); cursor: grab;
+            transition: opacity 0.2s, background-image 0.3s;
         }
 
-        /* Kategoriler - En alta sabitle ve birbirine girmesini engelle */
-        #drop-zones-container {
-            position: absolute; bottom: 20px; width: 95%; max-width: 600px;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-        }
+        /* 4 Köşeye yerleştirme */
         .zone { 
-            padding: 15px 5px; background: #3498db; color: white;
-            border-radius: 10px; text-align: center; font-weight: bold; font-size: 0.9rem;
+            position: absolute; width: 150px; padding: 20px; background: #3498db; color: white;
+            border-radius: 15px; text-align: center; font-weight: bold; cursor: pointer;
+            transition: background 0.3s;
         }
+        #zone-meyve { top: 50px; left: 50px; }
+        #zone-esya { top: 50px; right: 50px; }
+        #zone-arac { bottom: 50px; left: 50px; }
+        #zone-hayvan { bottom: 50px; right: 50px; }
     </style>
 </head>
 <body>
@@ -38,102 +39,25 @@
 
     <div id="draggable-item" draggable="true"></div>
 
-    <div id="drop-zones-container">
-        <div class="zone" data-category="Meyve">Meyve</div>
-        <div class="zone" data-category="Eşya">Eşya</div>
-        <div class="zone" data-category="Araç">Araç</div>
-        <div class="zone" data-category="Hayvan">Hayvan</div>
-    </div>
+    <div id="zone-meyve" class="zone" data-category="Meyve">Meyve</div>
+    <div id="zone-esya" class="zone" data-category="Eşya">Eşya</div>
+    <div id="zone-arac" class="zone" data-category="Araç">Araç</div>
+    <div id="zone-hayvan" class="zone" data-category="Hayvan">Hayvan</div>
 
     <script>
         const gameData = [
-            {word: "Elma", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/01/05/17/51/apple-1122537_640.jpg"},
-            {word: "Muz", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2013/07/13/10/24/banana-157077_640.png"},
-            {word: "Çilek", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2017/01/17/12/37/strawberries-1987178_640.jpg"},
-            {word: "Portakal", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/10/20/18/31/orange-1755869_640.jpg"},
-            {word: "Üzüm", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2017/09/16/19/21/grapes-2756534_640.jpg"},
-            {word: "Kiraz", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2015/07/20/12/57/cherries-852814_640.jpg"},
-            {word: "Limon", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/04/15/08/04/lemon-1330642_640.jpg"},
-            {word: "Karpuz", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/06/07/01/49/watermelon-1440626_640.jpg"},
-            {word: "Armut", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/03/05/22/23/pear-1238466_640.jpg"},
-            {word: "Ananas", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/03/05/22/22/pineapple-1238459_640.jpg"},
-            {word: "Kivi", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2015/12/09/23/45/kiwi-1085601_640.jpg"},
-            {word: "Şeftali", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/08/29/14/06/peach-1628770_640.jpg"},
-            {word: "Nar", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/11/04/10/43/pomegranate-1797304_640.jpg"},
-            {word: "Mango", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/12/28/09/35/mango-1935832_640.jpg"},
-            {word: "Erik", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/05/29/18/16/plum-1423238_640.jpg"},
-            {word: "İncir", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2014/12/21/23/34/figs-575775_640.jpg"},
-            {word: "Kavun", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2017/06/20/15/37/melon-2423853_640.jpg"},
-            {word: "Dut", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2017/07/11/15/48/mulberry-2493922_640.jpg"},
-            {word: "Kayısı", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/07/07/15/47/apricots-1502476_640.jpg"},
-            {word: "Ayva", cat: "Meyve", img: "https://cdn.pixabay.com/photo/2016/10/05/17/04/quince-1716943_640.jpg"},
-            {word: "Masa", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2017/08/03/15/01/table-2576020_640.jpg"},
-            {word: "Sandalye", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/11/18/15/31/chair-1834790_640.jpg"},
-            {word: "Lamba", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/11/29/04/19/desk-lamp-1867675_640.jpg"},
-            {word: "Bardak", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2015/07/28/22/01/glass-865187_640.jpg"},
-            {word: "Kitap", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/09/10/17/18/book-1659717_640.jpg"},
-            {word: "Gözlük", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/03/27/21/34/spectacles-1284419_640.jpg"},
-            {word: "Saat", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2015/06/25/17/56/clock-821756_640.jpg"},
-            {word: "Yastık", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/11/14/03/05/bed-1822485_640.jpg"},
-            {word: "Anahtar", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/02/09/16/35/keys-1189912_640.jpg"},
-            {word: "Telefon", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/11/29/05/45/apple-1867721_640.jpg"},
-            {word: "Çanta", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/11/23/17/25/bag-1853921_640.jpg"},
-            {word: "Makas", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/06/18/17/42/scissors-1465238_640.jpg"},
-            {word: "Tarama", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2017/05/11/08/48/comb-2303033_640.jpg"},
-            {word: "Çatal", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/06/06/15/34/fork-1439698_640.jpg"},
-            {word: "Kaşık", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2014/12/10/20/56/spoon-563602_640.jpg"},
-            {word: "Tarak", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2017/05/11/08/48/comb-2303033_640.jpg"},
-            {word: "Cüzdan", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/10/26/19/00/wallet-1771836_640.jpg"},
-            {word: "Şemsiye", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/04/16/09/04/umbrella-1332616_640.jpg"},
-            {word: "Kutu", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/09/25/20/48/box-1694709_640.jpg"},
-            {word: "Tabak", cat: "Eşya", img: "https://cdn.pixabay.com/photo/2016/03/27/18/15/plate-1283621_640.jpg"},
-            {word: "Araba", cat: "Araç", img: "https://cdn.pixabay.com/photo/2012/04/12/23/47/car-30984_640.png"},
-            {word: "Otobüs", cat: "Araç", img: "https://cdn.pixabay.com/photo/2014/04/03/00/38/bus-309072_640.png"},
-            {word: "Bisiklet", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/10/05/19/00/bicycle-1716960_640.jpg"},
-            {word: "Uçak", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/11/29/03/53/airplane-1867636_640.jpg"},
-            {word: "Gemi", cat: "Araç", img: "https://cdn.pixabay.com/photo/2014/12/21/23/50/ship-575841_640.jpg"},
-            {word: "Taksi", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/08/29/18/39/taxi-1629237_640.jpg"},
-            {word: "Tren", cat: "Araç", img: "https://cdn.pixabay.com/photo/2017/04/18/14/05/train-2238870_640.jpg"},
-            {word: "Motosiklet", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/11/22/22/24/motorcycle-1851255_640.jpg"},
-            {word: "Helikopter", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/11/29/03/38/helicopter-1867566_640.jpg"},
-            {word: "Kamyon", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/04/01/10/11/truck-1299960_640.jpg"},
-            {word: "Traktör", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/10/26/17/23/tractor-1771576_640.jpg"},
-            {word: "Vapur", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/09/24/18/06/ferry-1692296_640.jpg"},
-            {word: "Metrobüs", cat: "Araç", img: "https://cdn.pixabay.com/photo/2017/08/27/10/19/bus-2685799_640.jpg"},
-            {word: "Ambulans", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/09/29/16/32/ambulance-1703276_640.jpg"},
-            {word: "İtfaiye", cat: "Araç", img: "https://cdn.pixabay.com/photo/2017/05/29/21/21/fire-engine-2354580_640.jpg"},
-            {word: "Scooter", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/11/18/23/38/scooter-1836262_640.jpg"},
-            {word: "Denizaltı", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/02/09/16/43/submarine-1190367_640.jpg"},
-            {word: "Roket", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/03/31/19/56/rocket-1295355_640.png"},
-            {word: "Tramvay", cat: "Araç", img: "https://cdn.pixabay.com/photo/2017/01/26/09/39/tram-2010168_640.jpg"},
-            {word: "Kayık", cat: "Araç", img: "https://cdn.pixabay.com/photo/2016/01/08/11/57/boat-1128509_640.jpg"},
-            {word: "Kedi", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_640.jpg"},
-            {word: "Köpek", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg"},
-            {word: "Kuş", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/09/08/22/43/bird-1655554_640.jpg"},
-            {word: "At", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/39/horse-1867571_640.jpg"},
-            {word: "İnek", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/03/29/18/39/cow-1288599_640.jpg"},
-            {word: "Aslan", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/04/10/lion-1867664_640.jpg"},
-            {word: "Fil", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/14/04/45/elephant-1822636_640.jpg"},
-            {word: "Tavşan", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/12/13/00/13/rabbit-1903016_640.jpg"},
-            {word: "Maymun", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2017/06/13/22/42/monkey-2400550_640.jpg"},
-            {word: "Zürafa", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/08/42/giraffe-1868819_640.jpg"},
-            {word: "Balık", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/52/fish-1867634_640.jpg"},
-            {word: "Koyun", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/08/21/sheep-1868735_640.jpg"},
-            {word: "Tavuk", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/54/chicken-1867639_640.jpg"},
-            {word: "Ördek", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/04/00/duck-1867652_640.jpg"},
-            {word: "Kaplan", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/27/tiger-1867527_640.jpg"},
-            {word: "Ayı", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/59/bear-1867650_640.jpg"},
-            {word: "Kelebek", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/55/butterfly-1867642_640.jpg"},
-            {word: "Arı", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/40/bee-1867574_640.jpg"},
-            {word: "Penguen", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/08/04/penguin-1868661_640.jpg"},
-            {word: "Yılan", cat: "Hayvan", img: "https://cdn.pixabay.com/photo/2016/11/29/03/58/snake-1867648_640.jpg"}
+            // MEYVELER (20)
+            {word: "Elma", cat: "Meyve", img: "images/elma.jpg"}, {word: "Muz", cat: "Meyve", img: "images/muz.jpg"}, {word: "Çilek", cat: "Meyve", img: "images/cilek.jpg"}, {word: "Portakal", cat: "Meyve", img: "images/portakal.jpg"}, {word: "Üzüm", cat: "Meyve", img: "images/uzum.jpg"}, {word: "Kiraz", cat: "Meyve", img: "images/kiraz.jpg"}, {word: "Limon", cat: "Meyve", img: "images/limon.jpg"}, {word: "Karpuz", cat: "Meyve", img: "images/karpuz.jpg"}, {word: "Armut", cat: "Meyve", img: "images/armut.jpg"}, {word: "Ananas", cat: "Meyve", img: "images/ananas.jpg"}, {word: "Kivi", cat: "Meyve", img: "images/kivi.jpg"}, {word: "Şeftali", cat: "Meyve", img: "images/seftali.jpg"}, {word: "Nar", cat: "Meyve", img: "images/nar.jpg"}, {word: "Mango", cat: "Meyve", img: "images/mango.jpg"}, {word: "Erik", cat: "Meyve", img: "images/erik.jpg"}, {word: "İncir", cat: "Meyve", img: "images/incir.jpg"}, {word: "Kavun", cat: "Meyve", img: "images/kavun.jpg"}, {word: "Dut", cat: "Meyve", img: "images/dut.jpg"}, {word: "Kayısı", cat: "Meyve", img: "images/kayisi.jpg"}, {word: "Ayva", cat: "Meyve", img: "images/ayva.jpg"},
+            // EŞYALAR (20)
+            {word: "Masa", cat: "Eşya", img: "images/masa.jpg"}, {word: "Sandalye", cat: "Eşya", img: "images/sandalye.jpg"}, {word: "Lamba", cat: "Eşya", img: "images/lamba.jpg"}, {word: "Bardak", cat: "Eşya", img: "images/bardak.jpg"}, {word: "Kitap", cat: "Eşya", img: "images/kitap.jpg"}, {word: "Gözlük", cat: "Eşya", img: "images/gozluk.jpg"}, {word: "Saat", cat: "Eşya", img: "images/saat.jpg"}, {word: "Yastık", cat: "Eşya", img: "images/yastik.jpg"}, {word: "Anahtar", cat: "Eşya", img: "images/anahtar.jpg"}, {word: "Telefon", cat: "Eşya", img: "images/telefon.jpg"}, {word: "Çanta", cat: "Eşya", img: "images/canta.jpg"}, {word: "Makas", cat: "Eşya", img: "images/makas.jpg"}, {word: "Tarak", cat: "Eşya", img: "images/tarak.jpg"}, {word: "Çatal", cat: "Eşya", img: "images/catal.jpg"}, {word: "Kaşık", cat: "Eşya", img: "images/kasik.jpg"}, {word: "Cüzdan", cat: "Eşya", img: "images/cuzdan.jpg"}, {word: "Şemsiye", cat: "Eşya", img: "images/semsiye.jpg"}, {word: "Kutu", cat: "Eşya", img: "images/kutu.jpg"}, {word: "Tabak", cat: "Eşya", img: "images/tabak.jpg"}, {word: "Kalem", cat: "Eşya", img: "images/kalem.jpg"},
+            // ARAÇLAR (20)
+            {word: "Araba", cat: "Araç", img: "images/araba.jpg"}, {word: "Otobüs", cat: "Araç", img: "images/otobus.jpg"}, {word: "Bisiklet", cat: "Araç", img: "images/bisiklet.jpg"}, {word: "Uçak", cat: "Araç", img: "images/ucak.jpg"}, {word: "Gemi", cat: "Araç", img: "images/gemi.jpg"}, {word: "Taksi", cat: "Araç", img: "images/taksi.jpg"}, {word: "Tren", cat: "Araç", img: "images/tren.jpg"}, {word: "Motosiklet", cat: "Araç", img: "images/motosiklet.jpg"}, {word: "Helikopter", cat: "Araç", img: "images/helikopter.jpg"}, {word: "Kamyon", cat: "Araç", img: "images/kamyon.jpg"}, {word: "Traktör", cat: "Araç", img: "images/traktor.jpg"}, {word: "Vapur", cat: "Araç", img: "images/vapur.jpg"}, {word: "Metrobüs", cat: "Araç", img: "images/metrobus.jpg"}, {word: "Ambulans", cat: "Araç", img: "images/ambulans.jpg"}, {word: "İtfaiye", cat: "Araç", img: "images/itfaiye.jpg"}, {word: "Scooter", cat: "Araç", img: "images/scooter.jpg"}, {word: "Denizaltı", cat: "Araç", img: "images/denizalti.jpg"}, {word: "Roket", cat: "Araç", img: "images/roket.jpg"}, {word: "Tramvay", cat: "Araç", img: "images/tramvay.jpg"}, {word: "Kayık", cat: "Araç", img: "images/kayik.jpg"},
+            // HAYVANLAR (20)
+            {word: "Kedi", cat: "Hayvan", img: "images/kedi.jpg"}, {word: "Köpek", cat: "Hayvan", img: "images/kopek.jpg"}, {word: "Kuş", cat: "Hayvan", img: "images/kus.jpg"}, {word: "At", cat: "Hayvan", img: "images/at.jpg"}, {word: "İnek", cat: "Hayvan", img: "images/inek.jpg"}, {word: "Aslan", cat: "Hayvan", img: "images/aslan.jpg"}, {word: "Fil", cat: "Hayvan", img: "images/fil.jpg"}, {word: "Tavşan", cat: "Hayvan", img: "images/tavsan.jpg"}, {word: "Maymun", cat: "Hayvan", img: "images/maymun.jpg"}, {word: "Zürafa", cat: "Hayvan", img: "images/zurafa.jpg"}, {word: "Balık", cat: "Hayvan", img: "images/balik.jpg"}, {word: "Koyun", cat: "Hayvan", img: "images/koyun.jpg"}, {word: "Tavuk", cat: "Hayvan", img: "images/tavuk.jpg"}, {word: "Ördek", cat: "Hayvan", img: "images/ordek.jpg"}, {word: "Kaplan", cat: "Hayvan", img: "images/kaplan.jpg"}, {word: "Ayı", cat: "Hayvan", img: "images/ayi.jpg"}, {word: "Kelebek", cat: "Hayvan", img: "images/kelebek.jpg"}, {word: "Arı", cat: "Hayvan", img: "images/ari.jpg"}, {word: "Penguen", cat: "Hayvan", img: "images/penguen.jpg"}, {word: "Yılan", cat: "Hayvan", img: "images/yilan.jpg"}
         ];
 
-        let score = 0;
-        let currentItem = {};
-        const itemEl = document.getElementById('draggable-item');
-        const wordEl = document.getElementById('word-text');
-        const scoreEl = document.getElementById('score');
+        let score = 0, currentItem = {};
+        const itemEl = document.getElementById('draggable-item'), wordEl = document.getElementById('word-text'), scoreEl = document.getElementById('score');
 
         function loadItem() {
             currentItem = gameData[Math.floor(Math.random() * gameData.length)];
@@ -141,18 +65,17 @@
             itemEl.style.backgroundImage = `url('${currentItem.img}')`;
         }
 
-        // Sürükle ve Bırak
-        itemEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text', currentItem.cat));
+        itemEl.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text', currentItem.cat); itemEl.style.opacity = '0.4'; });
+        itemEl.addEventListener('dragend', () => itemEl.style.opacity = '1');
 
         document.querySelectorAll('.zone').forEach(zone => {
             zone.addEventListener('dragover', e => e.preventDefault());
             zone.addEventListener('drop', e => {
                 if(e.dataTransfer.getData('text') === zone.getAttribute('data-category')) {
-                    score += 10;
-                    scoreEl.innerText = "Puan: " + score;
-                    loadItem();
+                    score += 10; scoreEl.innerText = "Puan: " + score; loadItem();
                 } else {
-                    alert("Tekrar dene!");
+                    zone.style.background = "#e74c3c";
+                    setTimeout(() => zone.style.background = "#3498db", 500);
                 }
             });
         });
